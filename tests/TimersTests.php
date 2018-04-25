@@ -4,8 +4,9 @@ namespace Tests;
 
 use SoapBox\Timer\Timer;
 use SoapBox\Timer\Timers;
-use SoapBox\Timer\TimerNotInitializedException;
+use Illuminate\Support\Collection;
 use SoapBox\Timer\DuplicateTimerException;
+use SoapBox\Timer\TimerNotInitializedException;
 
 class TimersTests extends TestCase
 {
@@ -70,7 +71,17 @@ class TimersTests extends TestCase
 
         $timers = Timers::flush();
 
+        $this->assertInstanceOf(Collection::class, $timers);
         $this->assertCount(1, $timers);
         $this->assertSame($timer, $timers->get($timer->getName()));
+    }
+
+    /**
+     * @test
+     */
+    public function flushing_the_timers_returns_an_empty_collection()
+    {
+        $this->assertEmpty(Timers::flush());
+        $this->assertInstanceOf(Collection::class, Timers::flush());
     }
 }
