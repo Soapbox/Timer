@@ -72,7 +72,9 @@ class Timer implements Arrayable
      */
     public function stop(): void
     {
-        $this->end = microtime(true);
+        if ($this->isRunning()) {
+            $this->end = microtime(true);
+        }
     }
 
     /**

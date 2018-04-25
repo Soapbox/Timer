@@ -70,4 +70,20 @@ class TimerTests extends TestCase
 
         $this->assertTrue($timer->getElapsedTime() > 0);
     }
+
+    /**
+     * @test
+     */
+    public function calling_stop_multiple_times_does_not_change_the_elapsed_time()
+    {
+        $timer = Timer::start('timer');
+
+        $timer->stop();
+        $time = $timer->getElapsedTime();
+
+        $this->assertSame($time, $timer->getElapsedTime());
+
+        $timer->stop();
+        $this->assertSame($time, $timer->getElapsedTime());
+    }
 }
