@@ -6,7 +6,7 @@ php:
 before_script: composer install
 
 script:
-  - run-tests
+  - ./run-tests
 
 after_script:
   - mkdir -p build/logs
