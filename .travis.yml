@@ -6,7 +6,7 @@ php:
 before_script: composer install
 
 script:
-  - vendor/bin/phpunit
+  - run-tests
 
 after_script:
   - mkdir -p build/logs
