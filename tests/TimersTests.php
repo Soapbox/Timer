@@ -2,8 +2,10 @@
 
 namespace Tests;
 
+use Mockery;
 use SoapBox\Timer\Timer;
 use SoapBox\Timer\Timers;
+use Psr\Log\LoggerInterface;
 use Illuminate\Support\Collection;
 use SoapBox\Timer\DuplicateTimerException;
 use SoapBox\Timer\TimerNotInitializedException;
@@ -83,5 +85,42 @@ class TimersTests extends TestCase
     {
         $this->assertEmpty(Timers::flush());
         $this->assertInstanceOf(Collection::class, Timers::flush());
+    }
+
+    /**
+     * @test
+     */
+    public function reporting_the_timers_logs_the_inner_collection_of_timers_to_the_provided_log()
+    {
+        $log = Mockery::spy(LoggerInterface::class);
+
+        Timer::start('name');
+        Timers::report($log);
+
+        $log->shouldHaveReceived('log')->withArgs(function ($level, $message, $context) {
+            $this->assertSame('info', $level);
+            $this->assertSame('SoapBox\Timer\Timers::report', $message);
+            $this->assertTrue(isset($context['name']));
+
+            return true;
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function reporting_will_report_at_the_specified_level_to_the_provided_log()
+    {
+        $log = Mockery::spy(LoggerInterface::class);
+
+        Timers::report($log, 'error');
+
+        $log->shouldHaveReceived('log')->withArgs(function ($level, $message, $context) {
+            $this->assertSame('error', $level);
+            $this->assertSame('SoapBox\Timer\Timers::report', $message);
+            $this->assertEmpty($context);
+
+            return true;
+        });
     }
 }

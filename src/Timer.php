@@ -2,11 +2,13 @@
 
 namespace SoapBox\Timer;
 
+use Illuminate\Contracts\Support\Arrayable;
+
 /**
  * Timer is a class that exposes the ability to measure the amount of time that
  * has elapsed during code execution.
  */
-class Timer
+class Timer implements Arrayable
 {
     /**
      * Provides the ability to start a new timer with the provided name.
@@ -95,5 +97,20 @@ class Timer
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Returns an array representation of the timer.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'name' => $this->name,
+            'start' => $this->start,
+            'end' => $this->end,
+            'elapsed' => $this->getElapsedTime()
+        ];
     }
 }

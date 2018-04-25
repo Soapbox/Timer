@@ -2,6 +2,7 @@
 
 namespace SoapBox\Timer;
 
+use Psr\Log\LoggerInterface;
 use Illuminate\Support\Collection;
 
 class Timers
@@ -74,5 +75,18 @@ class Timers
         }
 
         return Timers::$timers->get($name);
+    }
+
+    /**
+     * Reports the contents of our timers to the provider logger.
+     *
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param string $level
+     *
+     * @return void
+     */
+    public static function report(LoggerInterface $logger, string $level = 'info'): void
+    {
+        $logger->log($level, __METHOD__, Timers::flush()->toArray());
     }
 }
