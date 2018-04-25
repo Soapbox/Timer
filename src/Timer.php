@@ -19,8 +19,8 @@ class Timer implements Arrayable
      */
     public static function start(string $name): Timer
     {
-        Timers::register(new Timer($name));
-        return Timers::get($name);
+        Timers::register($timer = new Timer($name));
+        return $timer;
     }
 
     /**

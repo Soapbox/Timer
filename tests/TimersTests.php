@@ -123,4 +123,99 @@ class TimersTests extends TestCase
             return true;
         });
     }
+
+    /**
+     * @test
+     */
+    public function disabling_the_timers_will_prevent_additional_timers_from_being_stored()
+    {
+        Timers::disable();
+
+        $timer = Timer::start('timer');
+        Timers::register($timer);
+
+        $timers = Timers::flush();
+
+        $this->assertEmpty($timers);
+
+        Timers::enable();
+
+        $timer = Timer::start('timer');
+
+        $timers = Timers::flush();
+
+        $this->assertCount(1, $timers);
+        $this->assertTrue($timers->has($timer->getName()));
+    }
+
+    /**
+     * @test
+     * @doesNotPerformAssertions
+     */
+    public function report_does_not_log_the_timers_if_the_timers_are_disabled_empty()
+    {
+        $log = Mockery::spy(LoggerInterface::class);
+
+        Timers::disable();
+        Timers::report($log);
+
+        $log->shouldNotHaveReceived('log');
+    }
+
+    /**
+     * @test
+     */
+    public function report_logs_the_timers_if_the_timers_are_disabled_and_not_empty()
+    {
+        $log = Mockery::spy(LoggerInterface::class);
+
+        Timer::start('timer');
+        Timers::disable();
+        Timers::report($log);
+
+        $log->shouldHaveReceived('log')->withArgs(function ($level, $message, $context) {
+            $this->assertSame('info', $level);
+            $this->assertSame('SoapBox\Timer\Timers::report', $message);
+            $this->assertTrue(isset($context['timer']));
+
+            return true;
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function report_logs_the_timers_if_the_timers_are_enabled_and_empty()
+    {
+        $log = Mockery::spy(LoggerInterface::class);
+
+        Timers::report($log);
+
+        $log->shouldHaveReceived('log')->withArgs(function ($level, $message, $context) {
+            $this->assertSame('info', $level);
+            $this->assertSame('SoapBox\Timer\Timers::report', $message);
+            $this->assertTrue(empty($context));
+
+            return true;
+        });
+    }
+
+    /**
+     * @test
+     */
+    public function report_logs_the_timers_if_the_timers_are_enabled_and_not_empty()
+    {
+        $log = Mockery::spy(LoggerInterface::class);
+
+        Timer::start('timer');
+        Timers::report($log);
+
+        $log->shouldHaveReceived('log')->withArgs(function ($level, $message, $context) {
+            $this->assertSame('info', $level);
+            $this->assertSame('SoapBox\Timer\Timers::report', $message);
+            $this->assertTrue(isset($context['timer']));
+
+            return true;
+        });
+    }
 }

@@ -15,6 +15,35 @@ class Timers
     private static $timers;
 
     /**
+     * Determines if the Timers are enabled or not.
+     *
+     * @var boolean
+     */
+    private static $enabled = false;
+
+    /**
+     * Enables the timers. I.E. Store the timers that are set so we can report
+     * them later.
+     *
+     * @return void
+     */
+    public static function enable(): void
+    {
+        Timers::$enabled = true;
+    }
+
+    /**
+     * Disables the timers. I.E. Preform a no-op when the timer methods are
+     * called so we can disable these at will in production.
+     *
+     * @return void
+     */
+    public static function disable(): void
+    {
+        Timers::$enabled = false;
+    }
+
+    /**
      * Returns the timers and resets the local set of timers.
      *
      * @return \Illuminate\Support\Collection
@@ -40,6 +69,10 @@ class Timers
      */
     public static function register(Timer $timer): void
     {
+        if (!Timers::$enabled) {
+            return;
+        }
+
         if (is_null(Timers::$timers)) {
             Timers::$timers = new Collection([]);
         }
@@ -65,6 +98,10 @@ class Timers
      */
     public static function get(string $name): Timer
     {
+        if (!Timers::$enabled) {
+            return Timer::start('null');
+        }
+
         if (is_null(Timers::$timers) || !Timers::$timers->has($name)) {
             $message = sprintf(
                 "The '%s' timer has not been initialized.",
@@ -87,6 +124,10 @@ class Timers
      */
     public static function report(LoggerInterface $logger, string $level = 'info'): void
     {
+        if (!Timers::$enabled && empty(Timers::$timers)) {
+            return;
+        }
+
         $logger->log($level, __METHOD__, Timers::flush()->toArray());
     }
 }
